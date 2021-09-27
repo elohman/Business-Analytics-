@@ -1,0 +1,285 @@
+---
+title: "Mini Assignment Mod 8 - Insurace Cost Model - Linear Regression"
+output:
+  html_document:
+    df_print: paged
+---
+
+Kaggle Notebook: https://www.kaggle.com/shikhar4128/insurance-cost-model-using-linear-regression/notebook 
+Data source: https://github.com/stedy/Machine-Learning-with-R-datasets 
+
+
+```{r}
+library(tidyverse) # metapackage with lots of helpful functions
+library(psych) #used for describeBy function
+library(scales) #used to make y axis in comma format
+library(GGally) #used for ggcorr
+library(ggcorrplot) #for ggcorrplot
+```
+
+```{r}
+insu <- read.csv("insurance.csv", stringsAsFactors = T)
+head(insu,10)
+str(insu)
+```
+
+```{r}
+summary(insu)
+```
+
+From summary(insu) we can derive:
+
+1) Gender is evenly distributed
+2) Min amd Max age in dataset is 18 and 64
+3) Smoker to non smoker ration is almost 4:1
+4) All 4 regions have equal datasets
+5) Average Medical cost is $13,270.
+
+# Creating yes/no categories
+```{r}
+insu$group <- ifelse(insu$charges > mean(insu$charges) ,"high","low") #create a col indicating charges are high or low
+insu$isObese <- ifelse(insu$bmi >= 30,"yes","no") #Create a col indicating if person is classified as obese or not
+```
+
+# Evaluating other variables 
+```{r}
+describeBy(insu$charges,insu$region) #charges by region
+```
+
+```{r}
+#charges by region
+insu %>%
+  group_by(region) %>%
+  summarize(meanCharges = mean(charges)) %>%
+  ungroup()
+```
+
+```{r}
+#total amount charged by region
+region_chrg <- insu %>% group_by (region) %>% summarize(Total_Charge =sum(charges)) %>%
+                  arrange(desc(Total_Charge))
+region_chrg
+```
+
+## EDA - Vizualization 
+```{r}
+#total charges by region
+ggplot(data=insu,aes(x=reorder(region,-charges),y=charges)) + # - is used for sorting in decending order 
+geom_bar(stat="identity",fill="steel blue") +
+scale_y_continuous(labels = comma) +
+labs(title="Total Charges By Region", x="Region",y="Charges")
+```
+
+```{r}
+ggplot(data = insu,aes(region,charges)) + geom_boxplot(fill = c(2:5)) +
+  theme_classic() + ggtitle("Boxplot of Medical Charges per Region")
+```
+
+Based on the above chart we can say that region doesnt have a large impact on medical cost
+
+```{r}
+#charges by smoker classification
+describeBy(insu$charges,insu$smoker)
+
+```
+
+```{r}
+smoker_chrg <- insu %>% group_by(smoker) %>% summarize(Total_Charge=sum(charges)) %>%
+                  arrange(desc(Total_Charge))
+smoker_chrg
+```
+
+```{r}
+ggplot(data=insu,aes(x=reorder(smoker,-charges),y=charges)) +
+geom_bar(stat="identity",fill="steel blue") +
+scale_y_continuous(labels = comma) +
+labs(title="Smoker Vs Charges", x="Smoker",y="Charges")
+```
+ 
+```{r}
+ggplot(data = insu,aes(smoker,charges)) + geom_boxplot(fill = c(2:3)) +
+  theme_classic() + ggtitle("Boxplot of Medical Charges by Smoking Status")
+```
+ 
+ Bases on the above boxplot we can say smokers spend more on medical cost.
+ 
+ 
+```{r}
+#charges by gender
+describeBy(insu$charges,insu$sex)
+```
+ 
+```{r}
+ggplot(data = insu,aes(sex,charges)) + geom_boxplot(fill = c(2:3)) +
+  theme_classic() + ggtitle("Boxplot of Medical Charges per Gender")
+```
+
+There is not that big of a difference between gender and medical charges, although males tend to have a wider interquartile range of charages. 
+
+```{r}
+#charges by children
+describeBy(insu$charges,insu$children)
+```
+
+```{r}
+ggplot(data = insu,aes(as.factor(children),charges)) + geom_boxplot(fill = c(2:7)) +
+  theme_classic() + ggtitle("Boxplot of Medical Charges per Children") +
+xlab("Num of Children")
+```
+
+People with 2 children have more medical expenses. 5 children, have less expenses.
+
+```{r}
+#obesity vs charge
+describeBy(insu$charges,insu$isObese)
+```
+
+```{r}
+ggplot(data = insu,aes(as.factor(isObese),charges)) + geom_boxplot(fill = c(2:3)) +
+  theme_classic() + ggtitle("Boxplot of Medical Charges per Obesity") +
+xlab("Obesity")
+```
+Customers classified as obese tend to incurr higher medical charges, although the median charge between the two does not differ largely.
+
+```{r}
+#Check the correlation between variables. We need to convert factor variables to numeric first before doing that.
+insu$sex <- as.numeric(insu$sex)
+insu$smoker <- as.numeric(insu$smoker)
+
+#insu$sex <- NULL
+#insu$region <- NULL #removing region and sex as it doesnt affect the charges as we have seen above in boxplot.
+
+head(insu)
+str(insu)
+
+corr <- cor(insu[1:6]) #excluding group and obesity which we created.
+corr
+```
+
+```{r}
+ggcorrplot(corr) #by defaut square
+ggcorrplot(corr,method="circle") #can do it in circle
+
+corr
+
+cor(insu[1:6])[,"charges"] #the value that most influence charges
+ggcorrplot(corr,hc.order = TRUE, type = "lower",
+   lab = TRUE)
+```
+ The three main factors effecting insurance charges (in decreasing order of importance) smoker, age, bmi (obesity)
+ smoker =0.79 > age(0.29) > bmi (0.18)
+ 
+# Regress charges by bmi with a scatter plot
+```{r}
+ggplot(insu, aes(x = bmi, y = charges)) +
+  geom_point() +
+  stat_smooth(method = 'lm')
+```
+
+```{r}
+ggplot(insu, aes(x = age, y = charges)) +
+  geom_point() +
+  stat_smooth(method = 'lm')
+```
+
+ 
+# Model 1 - Regression Analysis: 
+```{r}
+lm1 <- lm(formula =charges ~ age + bmi +children +smoker ,data=insu)
+summary(lm1)
+```
+
+
+# Model 2 - Linear Regression: Gives higher penalty to person who smokes and is obese
+
+```{r}
+lm2 <- lm (formula=charges ~ isObese * smoker ,data =insu)
+summary(lm2)
+```
+
+#Residuals 
+```{r}
+resids <- insu %>%
+  select(bmi, charges) %>%
+  mutate(fittedCharges = -5409.2 + 13386.2*bmi
+         , residuals = charges - fittedCharges)
+head(resids)
+```
+
+```{r}
+# Create a dataframe with residuals and identifying information
+resids2 <- insu %>%
+  select(age, bmi, children, smoker, charges)
+resids2$fittedCharges = lm1$fitted.values
+resids2$residuals = lm1$residuals
+
+# Get the five best performing store/quarter combinations
+best <- resids2 %>%
+  arrange(desc(residuals)) %>%
+  .[1:5,]
+# Get the five worst performing store/quarter combinations
+worst <- resids2 %>%
+  arrange(residuals) %>%
+  .[1:5,] %>%
+  arrange(desc(residuals))
+
+# Combine the five best and worst into one dataframe and display them
+bestWorst <- bind_rows(best,worst)
+bestWorst
+```
+
+# Model 3 - Linear Regression
+Gives higher penalty to person who smokes and is older
+```{r}
+lm3 <- lm(formula=charges ~ age +smoker ,data=insu)
+summary(lm3)
+```
+
+## Predicting Future Values
+```{r}
+# Dreate a dataframe of new observations
+newObservations <- data.frame(age = c(25, 32, 43, 54, 65)
+                              , bmi = c(19, 32, 43, 24, 15)
+                              ,children = c(1, 2, 3, 4, 5)
+                              , smoker = c(2, 1, 2, 1, 1))
+# Add a new column of predicted values
+newObservations$predictedCharges = predict(lm1, newObservations)
+# Display the dataframe in this notebook
+newObservations
+```
+
+```{r}
+# Dreate a dataframe of new observations
+newObservations_2 <- data.frame(age = c('25', '32', '43', '54', '65')
+                              , isObese = c('no', 'yes', 'yes', 'no', 'no')
+                              ,children = c(1, 2, 3, 4, 5)
+                              , smoker = c(2, 1, 2, 1, 1))
+# Add a new column of predicted values
+newObservations_2$predictedCharges = predict(lm2, newObservations_2)
+# Display the dataframe in this notebook
+newObservations_2
+```
+
+
+***************************SUMMARY**********************
+The business problem in this mini assignment to gauge the cost of insurance for individuals (employees) given their health qualifications. The analysis is predictive and nature and aimed at identifying the target variable, insurance price. The statistically significant predictor variables include age, smoking status, number of children, and obesity. Understanding these prediction cost can help an insurance company evaluate how much to charge those looking to get insurance or employers who will add employees onto a company health insurance plan. The linear regression algorithm was chosen as the data is used to make predictions and explain the relationships between the dependent variable (numerical NOT binary), and independent variables and to what degree of confidence we can attach to these predictions.
+
+Model 1 Analysis: 
+1) Smoking increases medical cost by USD 15059 
+2) As the number of children increase the health cost increases by USD 431 
+3) The older the person, the higher the medical cost
+
+On this model we get a r-squared of 0.7489 which implies that 74% of variation of charges can be explained by the set of independent variables we have included. This model has all the independent variables available in the original dataset. Also all variables we have include are statistically significant predictors of charges (p value < 0.05 <- level of significance)
+
+Model 2 Analysis: 
+1) Obesity increase medical cost by $18,463 
+2) Smoking increases medical cost by $13,386 
+3) If you smoke and are classifyed as obese then medical cost is expected to increase by $19,329
+
+Model 3 Analysis : 
+1) As age increases the medical cost increases. 
+2) Using just age and smoker as independent variables, we have built a model with an r-squared of 72.14% which is comparable with our first model which use all of the original variables.
+
+Conclusion: 
+1) I would use model 1 and also model 2 for penalty purpose. 
+2) We can conclude smoking is the single most effective variable effecting charges
