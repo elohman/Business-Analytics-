@@ -1,0 +1,626 @@
+---
+title: 'S&P 500 Analysis - 2020'
+author: "Emily Lohman"
+date: "9/26/2021"
+output: html_document
+---
+
+*********Data Analysis*********************************
+
+##Load Necessary Libraries 
+```{r}
+(library(dplyr)) # <- For sector analysis.
+(library(ggplot2)) # <- For nice plots.
+(library(plotly))
+```
+
+##Format Decimal Structure
+```{r}
+###Set Floating decimal points = 3
+options(
+  digits = 3
+)
+```
+
+##Load Data
+```{r}
+stocks <- read.csv("financials.csv",
+  header = TRUE,
+  stringsAsFactors = TRUE # This will be helpful when we do sector analysis.
+)
+```
+
+##Evaluate Data Structure 
+```{r}
+## Make sure everything loaded properly.
+
+head(stocks, n = 5)
+str(stocks)
+
+## Check the names of our variables.
+
+colnames(stocks)
+```
+
+##Clean Up the Column Names 
+```{r}
+## Each name was long and tedious to type, let's clean it up a bit.
+
+names(stocks) <- c("symbol", "name", "sector", "price", "pe", "div_yield",
+                   "eps", "high", "low", "market_cap", "ebitda", "ps", "pb")
+```
+```{r}
+## Check to make sure we did everything right.
+names(stocks)
+```
+```{r}
+## Get rid of pointless last column.
+
+stocks <- subset(stocks, select = -c(14))
+```
+```{r}
+## Make sure our data is still okay, and check data types.
+
+names(stocks)
+str(stocks)
+
+sum(is.na(stocks))
+```
+
+
+##Sector Analysis 
+```{r}
+# Create a new data frame grouping the sectors together
+# with their fundamentals  
+
+df <- stocks %>%
+  group_by(sector) %>%
+    summarise(
+      count = n(),
+      avg.price = as.integer(mean(price)),
+      med.pe = median(pe, na.rm = TRUE),
+      avg.eps = mean(eps),
+      cap = median(market_cap),
+      ebitda = median(ebitda),
+      ps = mean(ps),
+      pb = median(pb, na.rm = TRUE)
+)
+df
+
+str(df)
+
+nrow(stocks)
+median(stocks$market_cap)
+
+t <- df %>%
+  arrange(count) %>%
+  mutate(sector = factor(sector, levels = sector)) %>%
+  ggplot(aes(x = sector, y = count)) +
+  geom_segment(aes(xend = sector, yend = 0)) +
+  geom_point(size = 4, color = "black", fill = alpha("salmon", 0.4), alpha = 0.7, shape = 21, stroke = 2) +
+  coord_flip() +
+  xlab("") +
+  theme_bw()
+
+t
+```
+The largest sector within the S&P 500 is 'Consumer Discretionary' with 84 companies, the smallest sector is Telecommunication Services with 3 companies. 
+
+###Barplot of the sectors with the highest prices.
+```{r}
+# Order prices from lowest to highest.
+df.price <- df[order(df$avg.price),]
+
+# Make sure sector names are ordered with prices.
+df.price$sector <- factor(df.price$sector, levels = df.price$sector)
+df.price
+
+# Create the graph.
+ggplot(data = df.price, aes(x = sector, y = avg.price)) +
+  geom_bar(stat="identity", fill = "#ff6666", color = "black") +
+  scale_x_discrete(labels=c("Telecom", "Utilities", "Energy", "Staples", "RE",
+                            "Financials", "Materials", "Industrials", "IT",
+                            "Cons. Disc", "Healthcare")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=55, vjust=0.5))
+```
+The Healthcare Scetor has the highest average price per share at $132, while  Tellecommunications Services has the lowest at $33 per share
+
+
+##Barplot of highest market cap.
+```{r}
+# Same as before.
+df.cap <- df[order(df$cap),]
+df.cap$sector <- factor(df.cap$sector, levels = df.cap$sector)
+
+
+# So few telecom companies are skewing the data in its favor
+
+ggplot(data = df.cap, aes(x = sector, y = cap)) +
+  geom_bar(stat="identity", fill = "#ff6666", color = "black") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=55, vjust=0.5))
+
+# Let's fix this by dropping telecom from our factor.
+
+df.cap.new <- subset(df.cap, sector != "Telecommunication Services")
+df.cap.new
+
+ggplot(data = df.cap.new, aes(x = sector, y = cap)) +
+  geom_bar(stat="identity", fill = "#ff6666", color = "black") +
+  scale_x_discrete(labels=c("Cons. Disc", "RE", "Materials",
+                            "Utilities", "Industrials","Energy",
+                            "Financials","IT", "Staples", "Healthcare")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=55, vjust=0.5))
+```
+The Healthcare sector once again ranks the highest, this time for market cap at thirty-two billion three hundred million ($32,300,000,000)
+
+
+##Barplot of highest EBITDA
+```{r}
+df.ebit <- df[order(df$ebitda),]
+df.ebit$sector <- factor(df.ebit$sector, levels = df.ebit$sector)
+
+df.ebit.new <- subset(df.ebit, sector != "Telecommunication Services")
+df.ebit.new
+
+ggplot(data = df.ebit.new, aes(x = sector, y = ebitda)) +
+  geom_bar(stat="identity", fill = "#ff6666", color = "black") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle=55, vjust=0.5))
+
+
+which(stocks$sector == "Telecommunication Services")
+stocks[59,]
+stocks[100,]
+stocks[475,]
+```
+The sector with the highest earnings before interest, taxes, depreciation, and amortization is Consumer Staples. A high EBITDA percentage means your company has less operating expenses, and higher earnings, which shows that you can pay your operating costs and still have a decent amount of revenue left over.
+
+
+##Correlation Analysis 
+```{r}
+## Pairs plots 
+# Custom colors.
+v_color <- viridis::viridis(
+  n = nrow(stocks)
+)
+
+stocks$color <- v_color[Matrix::invPerm(
+  p = order(
+    x = stocks$ebitda
+  )
+)]
+
+# Let's explore our variables.
+pairs(
+  formula = ebitda ~ pe + div_yield + eps + sector +
+    market_cap + ps + pb,
+  data = stocks,
+  pch = 20,
+  col = stocks$color
+)
+
+# Data is all bunched up in lower-left corner, making it
+# difficult to draw any conclusions.
+
+## Correlation Matrix
+stocks.cor <- subset(stocks, select=-c(1,2,3,8,9,14))
+corr <- round(cor(stocks.cor), 2)
+corr
+
+ggcorrplot::ggcorrplot(corr,
+                       type = "lower",
+                       lab = TRUE,
+                       lab_size = 3,
+                       method = "circle",
+                       colors = c("red", "white", "green"),
+                       title = "Correlation of Variables",
+                       ggtheme = theme_bw
+)
+```
+The variables with the largest positive correlation are Market Cap and EBITDA, with a 77% confidence interval. The most negatively correlated variables are Dividend Yields and Price. Because of this strong correlation we will use EBITDA as our dependent variable for our initial model.
+
+
+##Building our original regression Model
+```{r}
+fit.ebit <- lm(
+  formula = ebitda ~ market_cap + pe + ps + eps + sector +
+                     div_yield  + pb,
+  data = stocks
+)
+summary(fit.ebit)
+library(car)
+car::vif(fit.ebit) #vif: Variance Inflation Factors - Calculates variance-inflation and generalized variance-inflation factors (VIFs and GVIFs) for linear, generalized linear, and other regression models.
+```
+The model has an adjusted r-squared 0f 0.717 which indicates a 71% confidence and a low p-value, indicating the data is statistically significant. Market cap, pe, financial sector, and Telecommunications sector have the most statistically significant correlation with EBITDA. PE and Financials sector are negatively correlated with EBITDA, Telecommunications is positively correlated.   
+
+## Diagnostic plots.
+```{r}
+plot(
+  x = fit.ebit,
+  col = stocks$color,
+  pch = 20,
+  which = 1:6
+)
+
+hist(
+  fit.ebit$residuals
+)
+```
+
+
+
+
+## Explore target variable
+```{r}
+## Density plot
+
+plot(
+  x = density(
+    x = stocks$ebitda,
+    bw = "SJ",
+    kern = "gaussian",
+    from = min(stocks$ebitda),
+    to = max(stocks$ebitda)
+  ),
+  type = "l",
+  main = "Gaussian kernel density estimate",
+  xlab = "EBITDA"
+)
+
+
+ggplot(stocks, aes(ebitda)) +
+  geom_density(aes(fill = "#FF9999", color = "black"), alpha = 0.6) +
+  theme_minimal() +
+  theme(legend.position = "none")
+
+
+## Boxplot
+
+boxplot(
+  x = stocks$ebitda,
+  ylab = "EBITDA"
+)
+
+## Q-Q graph
+
+qqnorm(
+  y = stocks$ebitda,
+  col = stocks$color,
+  pch = 20,
+  ylab = "EBITDA"
+)
+qqline(
+  y = stocks$ebitda,
+  lty = 2,
+  col = 2
+)
+
+```
+
+
+##Explore power transformations on our variables 
+
+```{r}
+####### Use family = 'bcnPower' for non-positive data #######
+
+
+## First, create a new dataset to perform variable changes on.
+
+stocks2 <- stocks
+
+
+## Market Cap
+
+
+# Count number of negative values in market_cap.
+
+nrow(stocks2[stocks2$market_cap<0,])
+
+# Check powerTransform() on market_cap
+
+pt_marketCap <- car::powerTransform(
+  object = market_cap ~ 1,
+  data = stocks2
+)
+summary(pt_marketCap) # <- -0.33 power
+
+```
+
+##PE
+```{r}
+# Count number of negative, 0, and NA values.
+
+nrow(stocks2[stocks2$pe < 0,])
+nrow(stocks2[stocks2$pe == 0,])
+
+# powerTransform() on pe
+
+pt_pe <- car::powerTransform(
+  object = pe ~ 1,
+  data = stocks2,
+  family = "bcnPower"
+)
+summary(
+  object = pt_pe # <- 0.191 power
+)
+```
+
+## P/S
+```{r}
+# powerTransform() on ps
+
+pt_ps <- car::powerTransform(
+  object = ps ~ 1,
+  data = stocks2
+)
+summary(
+  object = pt_ps # <- Log power
+)
+```
+
+## EPS
+```{r}
+nrow(stocks2[stocks2$eps<0,])
+
+pt_eps <- car::powerTransform(
+  object = eps ~ 1,
+  data = stocks2,
+  family = "bcnPower"
+)
+summary(
+  object = pt_eps # <- 0.229 power
+)
+```
+
+## P/B
+```{r}
+nrow(stocks2[stocks2$pb<0,])
+
+# powerTransform() on pb
+
+pt_pb <- car::powerTransform(
+  object = pb ~ 1,
+  data = stocks2
+  #family = "bcnPower"
+)
+summary(
+  object = pt_pb # <- -0.33 power
+)
+```
+
+## Dividend Yield
+```{r}
+# powerTransform() on div_yield
+
+nrow(stocks2[stocks2$div_yield<0,])
+nrow(stocks2[stocks2$div_yield==0,])
+
+
+pt_div <- car::powerTransform(
+  object = div_yield ~ 1,
+  data = stocks2,
+  family = "bcnPower"
+)
+summary(
+  object = pt_div # <- 0.5 power
+)
+```
+
+
+## EBITDA
+
+```{r}
+# Count number of NA, 0 and negative values.
+
+nrow(stocks[stocks$ebitda<0,])
+nrow(stocks[stocks$ebitda==0,])
+
+# Build powerTransform() model on ebitda
+
+pt_ebit <- car::powerTransform(
+  object = ebitda ~ I(market_cap^-0.33) + I(pe^0.191) + log(ps) + 
+                    I(eps^0.229) + I(div_yield^0.5) 
+                    + I(pb^-0.33),
+  data = stocks2,
+  family = "bcnPower"
+)
+summary(
+  object = pt_ebit # <- Log power
+)
+```
+
+
+
+                                     
+##New model with transformations    
+```{r}
+new_fit <- lm(
+  formula = ebitda ~ I(market_cap^-0.33) + I(pe^0.191) + log(ps) + 
+                      I(eps^0.229) + sector + I(div_yield^0.5) 
+                      + I(pb^-0.33),
+  data = stocks
+)
+summary(new_fit)
+car::vif(new_fit)
+
+plot(
+  x = new_fit,
+  col = stocks$color,
+  pch = 20,
+  which = 1:6
+)
+```
+                                     
+
+
+
+
+# Much lower R-squared than expected.
+# All possible transformations performed have not
+# improved the model. It seems the original
+# model was a better fit for the data.
+
+
+## Use olsrr library to assist with variable selection
+```{r}
+olsrr::ols_step_forward_p(new_fit)
+olsrr::ols_step_forward_p(fit.ebit)
+```
+
+
+
+# Step forward selection suggests we drop pb and div_yield on new_fit
+# and just pb on the original model.
+
+
+### We also need to deal with missing values.
+
+
+## Locate missing values.
+```{r}
+na.sums <- colSums(is.na(stocks2))
+miss.vals <- data.frame(
+  na = na.sums
+)
+miss.vals
+```
+
+
+
+## Impute median for missing pe and pb entries.
+```{r}
+sum(is.na(stocks2))
+
+stocks2$pe <- Hmisc::impute(stocks2$pe, median)
+stocks2$pb <- Hmisc::impute(stocks2$pb, median)
+str(stocks2)
+sum(is.na(stocks2$pb))
+is.na(stocks2$pe)
+```
+
+
+
+##Building a simpler model.
+```{r}
+simple_fit <- lm(
+  formula = ebitda ~ market_cap + pe + ps +
+                     eps + sector + div_yield,
+  data = stocks2
+)
+summary(simple_fit)
+car::vif(simple_fit)
+
+anova(simple_fit)
+```
+
+
+## Obtain predicted metrics
+```{r}
+actual <- stocks2$ebitda
+predicted <- predict(simple_fit)
+
+
+pred_frame <- data.frame(
+  actual = actual,
+  predicted = predicted
+)
+pred_frame
+```
+
+```{r}
+Metrics::rmse(actual, predicted)
+Metrics::mse(actual, predicted)
+Metrics::mae(actual, predicted)
+range(stocks2$ebitda)
+```
+
+
+
+## Why do so few financial stocks have a reported EBITDA? 
+
+```{r}
+which(stocks$sector == "Financials")
+```
+
+
+## Build a tibble of the stocks dataset.
+```{r}
+new.frame <- as_tibble(stocks)
+```
+
+
+# Slice and create a new variable filtering the data by financials.
+```{r}
+new.frame %>% slice(1:nrow(stocks))
+fin.frame <- new.frame %>% filter(sector == "Financials")
+fin.frame
+```
+
+
+# Print all rows.
+```{r}
+print(fin.frame, n = nrow(fin.frame))
+```
+
+# How many 0 values of EBITDA are there?
+```{r}
+nrow(fin.frame[fin.frame$ebitda == 0,])
+```
+
+
+# 51 of 68 finanical companies have no reported EBITDA
+
+
+
+##           Simplest Model             
+
+```{r}
+length(stocks2$ebitda)
+
+new.dat <- subset(stocks2, sector != "Financials")
+length(new.dat$ebitda)
+
+
+other_fit <- lm(
+  formula = ebitda ~ market_cap + pe + ps +
+    eps + sector + div_yield,
+  data = new.dat
+)
+summary(other_fit)
+car::vif(other_fit)
+
+plot(
+  x = other_fit,
+  col = stocks$color,
+  pch = 20,
+  which = 1:6
+)
+
+```
+
+```{r}
+original <- summary(fit.ebit)$r.squared
+pt <- summary(new_fit)$r.squared        # power-transformed model
+simple <- summary(other_fit)$r.squared
+
+models <- data.frame(
+  model <- c("pt", "original", "simple"),
+  Rsq <- c(pt, original, simple)
+)
+models
+names(models) <- c("model", "Rsq")
+models
+
+ggplot(models, aes(x = model, y = Rsq)) +
+  geom_bar(stat = "identity", fill = "#ff6666", color = "black") +
+  labs(title = "Model Comparison of R-squared") +
+  theme_minimal()---
+```
+
+
+
+
+
