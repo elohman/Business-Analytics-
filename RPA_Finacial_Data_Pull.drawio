@@ -1,16 +1,19 @@
-<mxfile host="app.diagrams.net" modified="2021-12-13T06:23:43.524Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36" etag="3wn3g9AWV76Ul9E9wffq" version="15.9.4" type="github">
+<mxfile host="app.diagrams.net" modified="2021-12-13T08:46:02.062Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36" etag="qrUEYLL6QdA8dbqM_w-J" version="15.9.4" type="github">
   <diagram id="FBYuZ8vgcihNYxdQvZ12" name="Page-1">
     <mxGraphModel dx="782" dy="444" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
+        <mxCell id="bpsd50fUaObvi4L-TfuP-23" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f9f7ed;strokeColor=#36393d;" vertex="1" parent="1">
+          <mxGeometry x="202.5" width="355" height="300" as="geometry" />
+        </mxCell>
         <mxCell id="bpsd50fUaObvi4L-TfuP-15" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
           <mxGeometry x="225" y="310" width="300" height="1190" as="geometry" />
         </mxCell>
         <mxCell id="bpsd50fUaObvi4L-TfuP-1" value="Pull S&amp;amp;P 500 data from CapitalIQ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3c800;fontColor=#000000;strokeColor=#B09500;" vertex="1" parent="1">
           <mxGeometry x="230" y="10" width="300" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="bpsd50fUaObvi4L-TfuP-2" value="Screening / Saved Screens/ S&amp;amp;P500 Filter" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="bpsd50fUaObvi4L-TfuP-2" value="Screening / Saved Screens/ S&amp;amp;P500 Filter" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="315" y="150" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="bpsd50fUaObvi4L-TfuP-3" value="Download excel doc" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
@@ -41,12 +44,12 @@
           <mxGeometry x="302.5" y="680" width="145" height="100" as="geometry" />
         </mxCell>
         <mxCell id="bpsd50fUaObvi4L-TfuP-13" value="Save As CSV" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
-          <mxGeometry x="327.5" y="1400" width="120" height="80" as="geometry" />
+          <mxGeometry x="327.5" y="1410" width="120" height="80" as="geometry" />
         </mxCell>
         <mxCell id="bpsd50fUaObvi4L-TfuP-14" value="Run Excel Macros" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3c800;strokeColor=#B09500;fontColor=#000000;" vertex="1" parent="1">
           <mxGeometry x="230" y="320" width="290" height="60" as="geometry" />
         </mxCell>
-        <mxCell id="bpsd50fUaObvi4L-TfuP-16" value="Log into S&amp;amp;P CapitalIQ" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+        <mxCell id="bpsd50fUaObvi4L-TfuP-16" value="Log into S&amp;amp;P CapitalIQ" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#ffcc99;strokeColor=#36393d;" vertex="1" parent="1">
           <mxGeometry x="315" y="80" width="120" height="60" as="geometry" />
         </mxCell>
         <mxCell id="bpsd50fUaObvi4L-TfuP-18" value="Open R Studio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3c800;fontColor=#000000;strokeColor=#B09500;" vertex="1" parent="1">
