@@ -1,1 +1,58 @@
-<mxfile host="app.diagrams.net" modified="2021-12-13T03:58:31.811Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36" version="15.9.4" etag="Zx1xOQiFiJ6eBXuL3QZk" type="github"><diagram id="FBYuZ8vgcihNYxdQvZ12">UzV2zq1wL0osyPDNT0nNUTV2VTV2LsrPL4GwciucU3NyVI0MMlNUjV1UjYwMgFjVyA2HrCFY1qAgsSg1rwSLBiADYTaQg2Y1AA==</diagram></mxfile>
+<mxfile host="app.diagrams.net" modified="2021-12-13T06:08:06.260Z" agent="5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.45 Safari/537.36" etag="hFBxPlWuK1XlKM7hc8Ha" version="15.9.4" type="github">
+  <diagram id="FBYuZ8vgcihNYxdQvZ12" name="Page-1">
+    <mxGraphModel dx="782" dy="444" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="bpsd50fUaObvi4L-TfuP-15" value="" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+          <mxGeometry x="225" y="310" width="300" height="1050" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-1" value="Pull S&amp;amp;P 500 data from CapitalIQ" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3c800;fontColor=#000000;strokeColor=#B09500;" vertex="1" parent="1">
+          <mxGeometry x="230" y="10" width="300" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-2" value="Screening / Saved Screens/ S&amp;amp;P500 Filter" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="315" y="150" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-3" value="Download excel doc" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="315" y="220" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-4" value="Delete /Rename Headers" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="310" y="400" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-5" value="Change market cap: multiply by 1,000,000" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="296.25" y="470" width="147.5" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-7" value="Change EBITDA: multiply by 1,000,000" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="302.5" y="570" width="145" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-8" value="Replace empty cells with null / remove artifacts, including calculated EBITDA column (filter and sort by -)" style="square;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;" vertex="1" parent="1">
+          <mxGeometry x="310" y="1140" width="145" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-9" value="Extract only Security Ticker from Ticker column" style="ellipse;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;" vertex="1" parent="1">
+          <mxGeometry x="302.5" y="790" width="145" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-10" value="Calculate Price/Earnings:&amp;nbsp;&lt;br&gt;Price / EPS" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="310" y="910" width="145" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-11" value="Calculate Price/Sales:&amp;nbsp;&lt;br&gt;Market Cap / Revenue" style="ellipse;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;" vertex="1" parent="1">
+          <mxGeometry x="315" y="1020" width="145" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-12" value="Change Revenue: multiply by 1,000,000" style="ellipse;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;" vertex="1" parent="1">
+          <mxGeometry x="302.5" y="680" width="145" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-13" value="Save As CSV" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;" vertex="1" parent="1">
+          <mxGeometry x="322.5" y="1240" width="120" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-14" value="Run Excel Macros" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3c800;strokeColor=#B09500;fontColor=#000000;" vertex="1" parent="1">
+          <mxGeometry x="230" y="320" width="290" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-16" value="Log into S&amp;amp;P CapitalIQ" style="rounded=0;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="315" y="80" width="120" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="bpsd50fUaObvi4L-TfuP-18" value="Open R Studio" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e3c800;fontColor=#000000;strokeColor=#B09500;" vertex="1" parent="1">
+          <mxGeometry x="230" y="1380" width="300" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
